@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>なつかしの歌 きょくあてクイズ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Yu Gothic UI","Meiryo","Hiragino Kaku Gothic ProN",sans-serif}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:#fdf3e1;color:#3b2a1a}
+.screen{display:none;position:absolute;inset:0;padding:2.2vh 3vw;flex-direction:column;align-items:center}
+.screen.active{display:flex}
+button{cursor:pointer;border:none;font-weight:bold;font-family:inherit}
+button:disabled{cursor:default;opacity:.35}
+
+/* スタート画面 */
+#start{justify-content:center;gap:3vh}
+#start h1{font-size:8.5vh;color:#b0421a;text-align:center;line-height:1.25}
+#start .sub{font-size:4vh;color:#6b4a2b}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:2.5vh 2.5vw;width:min(1100px,92vw)}
+.cat{font-size:6vh;padding:3vh 1vw;border-radius:2.5vh;color:#fff;background:linear-gradient(135deg,#e07a3a,#c85a22);box-shadow:0 .8vh 0 #8f3f14}
+.cat.b{background:linear-gradient(135deg,#4f9a8a,#2f7a6a);box-shadow:0 .8vh 0 #1d5648}
+.cat.all{grid-column:span 2;background:linear-gradient(135deg,#8a63b8,#6a44a0);box-shadow:0 .8vh 0 #482a74}
+.cat:active{transform:translateY(.6vh);box-shadow:0 .2vh 0 rgba(0,0,0,.3)}
+.credit{position:absolute;bottom:1.5vh;font-size:2.2vh;color:#9a7d5c}
+
+/* 問題画面 */
+#game{gap:1.6vh}
+.top{width:100%;display:flex;justify-content:space-between;align-items:center}
+.counter{font-size:3.6vh;color:#8a5a2a;font-weight:bold}
+#btnTitle{font-size:2.4vh;padding:1vh 1.6vw;border-radius:1.4vh;background:transparent;color:#8a6a4a;border:.3vh solid #c9ae8a}
+.qtitle{font-size:7vh;font-weight:bold;color:#b0421a;display:flex;align-items:center;gap:1.5vw}
+.note{font-size:8vh;display:inline-block}
+.note.play{animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-1.2vh) rotate(6deg)}}
+.bar{width:min(1300px,92vw);height:1.6vh;background:#ead9bd;border-radius:1vh;overflow:hidden}
+.bar>div{height:100%;width:0;background:#e07a3a;transition:width .25s linear}
+.status{font-size:3vh;color:#7a5a3a;min-height:4vh}
+.choices{width:min(1300px,92vw);display:flex;flex-direction:column;gap:1.6vh}
+.choice{display:flex;align-items:center;gap:2vw;font-size:6.4vh;text-align:left;padding:1.5vh 2.5vw;border-radius:2.2vh;background:#fff;color:#3b2a1a;border:.5vh solid #d9bf98;box-shadow:0 .6vh 0 #d9bf98}
+.choice .n{flex:none;width:8vh;height:8vh;border-radius:50%;background:#e07a3a;color:#fff;font-size:5.2vh;display:flex;align-items:center;justify-content:center}
+.choice:active:not(:disabled){transform:translateY(.5vh)}
+.choice.correct{background:#d8f3dc;border-color:#2e9d57;box-shadow:0 .6vh 0 #2e9d57}
+.choice.correct .n{background:#2e9d57}
+.choice.wrong{background:#fff0d2;border-color:#e0a02a;box-shadow:0 .6vh 0 #e0a02a}
+.choice.wrong .n{background:#e0a02a}
+.choice:disabled{opacity:1}
+.choice.dim{opacity:.45}
+.after .choices{gap:.8vh}
+.after .choice{font-size:4.4vh;padding:.6vh 2.2vw}
+.after .choice .n{width:5.4vh;height:5.4vh;font-size:3.6vh}
+.after .qtitle{font-size:5vh}
+.after .note{font-size:5.6vh}
+.after .status{display:none}
+.after .reveal .res{font-size:4.2vh;line-height:1.3}
+.after .reveal .lyr{font-size:3.9vh;line-height:1.3;margin-top:.5vh}
+.after .reveal{padding:1vh 2vw}
+.after .cbtn{font-size:3.8vh;padding:1.2vh 2.2vw}
+.reveal{width:min(1300px,92vw);display:none;background:#fffaf0;border:.5vh solid #e0b878;border-radius:2.2vh;padding:1.6vh 2vw;text-align:center}
+.reveal.show{display:block}
+.reveal .res{font-size:5.4vh;font-weight:bold;color:#b0421a;white-space:pre-line}
+.reveal .lyr{font-size:4.6vh;line-height:1.45;margin-top:1vh;white-space:pre-line}
+.ctrl{display:flex;gap:2vw;margin-top:auto;padding-bottom:.5vh}
+.cbtn{font-size:4.4vh;padding:1.8vh 2.6vw;border-radius:2vh;color:#fff;min-width:19vw}
+#btnPlay{background:#e07a3a;box-shadow:0 .7vh 0 #8f3f14}
+#btnShow{background:#4f9a8a;box-shadow:0 .7vh 0 #1d5648}
+#btnNext{background:#4a78c4;box-shadow:0 .7vh 0 #284a86}
+.cbtn:active:not(:disabled){transform:translateY(.5vh)}
+
+/* 終了画面 */
+#end{justify-content:center;gap:4vh;text-align:center}
+#end h2{font-size:9vh;color:#b0421a}
+#end p{font-size:5vh;color:#6b4a2b}
+#btnRestart{font-size:5.4vh;padding:2.4vh 5vw;border-radius:2.4vh;color:#fff;background:linear-gradient(135deg,#4f9a8a,#2f7a6a);box-shadow:0 .8vh 0 #1d5648}
+</style>
+</head>
+<body>
+
+<div id="start" class="screen active">
+  <h1>なつかしの歌<br>きょくあてクイズ</h1>
+  <div class="sub">うたを きいて、曲名を あてましょう</div>
+  <div class="cats">
+    <button class="cat" onclick="startGame('shoka')">しょうか</button>
+    <button class="cat b" onclick="startGame('doyo')">どうよう</button>
+    <button class="cat all" onclick="startGame('all')">ぜんぶ</button>
+  </div>
+  <div class="credit">AIの助けを借りて作りました</div>
+</div>
+
+<div id="game" class="screen">
+  <div class="top">
+    <div class="counter" id="counter">もんだい 1 / 2</div>
+    <button id="btnTitle" onclick="backToTitle()">タイトルへ</button>
+  </div>
+  <div class="qtitle"><span class="note" id="note">♪</span><span>この曲は、なんでしょう？</span></div>
+  <div class="bar"><div id="prog"></div></div>
+  <div class="status" id="status"></div>
+  <div class="choices" id="choices"></div>
+  <div class="reveal" id="reveal"><div class="res" id="res"></div><div class="lyr" id="lyr"></div></div>
+  <div class="ctrl">
+    <button id="btnPlay" class="cbtn" onclick="onPlay()">きょくを ながす</button>
+    <button id="btnShow" class="cbtn" onclick="onShow()">こたえを みる</button>
+    <button id="btnNext" class="cbtn" onclick="onNext()" disabled>つぎへ</button>
+  </div>
+</div>
+
+<div id="end" class="screen">
+  <h2>おつかれさまでした！</h2>
+  <p>みなさんで うたって、たのしかったですね</p>
+  <button id="btnRestart" onclick="toTitle()">はじめに もどる</button>
+</div>
+
+<script>
+// ---- 曲のデータ ----
+// kind: shoka=唱歌 / doyo=童謡。audio があるものだけが問題になる。ないものは、まちがいの選択肢にだけ使う。
+const SONGS = [
+  {id:'furusato', title:'ふるさと', kind:'shoka', audio:'audio/furusato.m4a',
+   lyrics:'兎追いし かの山\n小鮒釣りし かの川\n夢は今も めぐりて\n忘れがたき 故郷'},
+  {id:'akatonbo', title:'赤とんぼ', kind:'doyo', audio:'audio/akatonbo.m4a',
+   lyrics:'夕焼 小焼の 赤とんぼ\n負われて見たのは いつの日か'},
+  {id:'oborozukiyo', title:'朧月夜', kind:'shoka', audio:'audio/oborozukiyo.m4a'},
+  {id:'harugakita', title:'春が来た', kind:'shoka', audio:'audio/harugakita.m4a'},
+  {id:'momiji', title:'もみじ', kind:'shoka', audio:'audio/momiji.m4a'},
+  {id:'kishapoppo', title:'汽車', kind:'shoka', audio:'audio/kishapoppo.m4a'},
+  {id:'warewauminoko', title:'われは海の子', kind:'shoka', audio:'audio/warewauminoko.m4a'},
+  {id:'chatsumi', title:'茶摘み', kind:'shoka', audio:'audio/chatsumi.m4a'},
+  {id:'mushinokoe', title:'虫のこえ', kind:'shoka', audio:'audio/mushinokoe.m4a'},
+  {id:'momotaro', title:'桃太郎', kind:'shoka', audio:'audio/momotaro.m4a'},
+  {id:'kojonotsuki', title:'荒城の月', kind:'shoka', audio:'audio/kojonotsuki.m4a'},
+  {id:'nanatsunoko', title:'七つの子', kind:'doyo', audio:'audio/nanatsunoko.m4a'},
+  {id:'shabondama', title:'シャボン玉', kind:'doyo', audio:'audio/shabondama.m4a'},
+  {id:'akaikutsu', title:'赤い靴', kind:'doyo', audio:'audio/akaikutsu.m4a'},
+  {id:'usagi', title:'うさぎ', kind:'doyo', audio:'audio/usagi.m4a'},
+  {id:'kutsuganaru', title:'靴が鳴る', kind:'doyo', audio:'audio/kutsuganaru.m4a'},
+  {id:'dongurikorokoro', title:'どんぐりころころ', kind:'doyo', audio:'audio/dongurikorokoro.m4a'},
+  {id:'seikurabe', title:'背くらべ', kind:'doyo', audio:'audio/seikurabe.m4a'},
+  {id:'shojojinotanukibayashi', title:'証城寺の狸囃子', kind:'doyo', audio:'audio/shojojinotanukibayashi.m4a'},
+  {id:'anomachikonomachi', title:'あの町この町', kind:'doyo', audio:'audio/anomachikonomachi.m4a'}
+];
+
+let questions=[], qi=0, cur=null, audio=null;
+let state='idle';      // idle / playing / paused / ended
+let revealed=false, picked=-1;
+
+const $=id=>document.getElementById(id);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ---- 声（ファイルがなくても、そのまま動く） ----
+// audio/voice/ask1.wav〜ask3.wav（曲の直前）、after1.wav〜after3.wav（曲のあと）、end.wav（終了画面）
+const VOICE_DIR='audio/voice/', VOICE_EXT='.wav';
+const lastVoice={ask:0,after:0};
+let voiceAudio=null;   // 曲のあとの声・終了の声（曲とは別に管理）
+function pickVoice(kind){
+  let n; do{ n=1+Math.floor(Math.random()*3); }while(n===lastVoice[kind]);
+  lastVoice[kind]=n; return VOICE_DIR+kind+n+VOICE_EXT;
+}
+function stopVoice(){
+  if(voiceAudio){voiceAudio.onended=null;voiceAudio.onerror=null;voiceAudio.pause();voiceAudio=null;}
+}
+function playVoiceFree(path){   // 曲のあと・終了：ならなくても、何も起きない
+  stopVoice();
+  const v=new Audio(path); voiceAudio=v;
+  v.onerror=()=>{ if(voiceAudio===v) voiceAudio=null; };
+  v.play().catch(()=>{ if(voiceAudio===v) voiceAudio=null; });
+}
+
+function stopAudio(){
+  stopVoice();
+  if(audio){audio.onended=null;audio.onerror=null;audio.ontimeupdate=null;audio.pause();audio=null;}
+}
+
+function startGame(cat){
+  const pool=SONGS.filter(s=>s.audio && (cat==='all'||s.kind===cat));
+  if(!pool.length){alert('この ジャンルの 曲は まだ ありません');return;}
+  questions=shuffle(pool); qi=0; loadQuestion(); showScreen('game');
+}
+
+function loadQuestion(){
+  stopAudio();
+  cur=questions[qi]; state='idle'; revealed=false; picked=-1;
+  $('counter').textContent='もんだい '+(qi+1)+' / '+questions.length;
+  $('prog').style.width='0%';
+  $('note').classList.remove('play');
+  $('reveal').classList.remove('show'); $('game').classList.remove('after');
+  // 選択肢：同じ種類（唱歌／童謡）のほかの曲から2つ。足りなければ、ほかの種類から。
+  const others=SONGS.filter(s=>s.title!==cur.title);
+  const same=shuffle(others.filter(s=>s.kind===cur.kind));
+  const diff=shuffle(others.filter(s=>s.kind!==cur.kind));
+  const wrong=same.concat(diff).slice(0,2).map(s=>s.title);
+  const opts=shuffle([cur.title].concat(wrong));
+  const box=$('choices'); box.innerHTML='';
+  opts.forEach((t,i)=>{
+    const b=document.createElement('button'); b.className='choice'; b.dataset.title=t;
+    b.innerHTML='<span class="n">'+(i+1)+'</span><span>'+t+'</span>';
+    b.onclick=()=>onPick(i,t);
+    box.appendChild(b);
+  });
+  setStatus('「きょくを ながす」を おしてください');
+  refreshButtons();
+}
+
+function setStatus(t){$('status').textContent=t;}
+
+function refreshButtons(){
+  const bp=$('btnPlay');
+  if(state==='idle') bp.textContent='きょくを ながす';
+  else if(state==='playing') bp.textContent='いちじ ていし';
+  else if(state==='paused') bp.textContent='つづきを ながす';
+  else bp.textContent='もういちど きく';
+  $('btnShow').disabled=revealed;
+  $('btnNext').disabled=!(state==='ended');
+}
+
+function startIntro(){   // 曲の直前の一言。ならなければ、すぐ曲へ
+  stopAudio();
+  const v=new Audio(pickVoice('ask')); audio=v;
+  let went=false; const go=()=>{ if(went||v!==audio) return; went=true; startAudio(); };
+  v.onended=go; v.onerror=go;
+  state='playing'; $('note').classList.add('play'); setStatus('きいてください…');
+  v.play().catch(go);
+  refreshButtons();
+}
+
+function startAudio(){
+  stopAudio();
+  audio=new Audio(cur.audio);
+  const a=audio;
+  a.ontimeupdate=()=>{ if(a.duration) $('prog').style.width=Math.min(100,a.currentTime/a.duration*100)+'%'; };
+  a.onended=()=>{ if(a!==audio) return; onSongEnd(); };
+  a.onerror=()=>{ if(a!==audio) return; // 読めないときは、止まらないように先へ進める
+    setStatus('音が よみこめませんでした'); state='ended'; $('note').classList.remove('play'); refreshButtons(); };
+  state='playing'; $('note').classList.add('play'); setStatus('きいてください…');
+  a.play().catch(e=>{ if(a!==audio) return; setStatus('音が ならないときは、もう一度 おしてください'); state='idle'; $('note').classList.remove('play'); refreshButtons(); });
+  refreshButtons();
+}
+
+function onPlay(){
+  if(state==='idle'){ startIntro(); }
+  else if(state==='ended'){ startAudio(); }
+  else if(state==='playing'){ audio.pause(); state='paused'; $('note').classList.remove('play'); setStatus('いちじ ていし中'); refreshButtons(); }
+  else if(state==='paused'){ state='playing'; $('note').classList.add('play'); setStatus('きいてください…');
+    audio.play().catch(()=>{}); refreshButtons(); }
+}
+
+function onSongEnd(){
+  state='ended'; $('note').classList.remove('play'); $('prog').style.width='100%';
+  if(!revealed) reveal(-1);
+  setStatus('うたが おわりました。「つぎへ」を おしてください');
+  refreshButtons();
+  setTimeout(()=>{ if(state==='ended' && audio) playVoiceFree(pickVoice('after')); },700);
+}
+
+function onPick(i,t){
+  if(revealed) return;
+  picked=i; reveal(t);
+}
+function onShow(){ if(!revealed) reveal(-1); }
+
+function reveal(pickedTitle){
+  revealed=true;
+  const btns=[...document.querySelectorAll('.choice')];
+  btns.forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.title===cur.title) b.classList.add('correct');
+    else if(b.dataset.title===pickedTitle) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  // 曲が流れている最中なら「最後まで」の一言を足す。曲が終わっていれば、足さない
+  const playing=(state!=='ended');
+  let msg;
+  if(pickedTitle===-1) msg='こたえは「'+cur.title+'」です'+(playing?'。最後までききましょう。':'');
+  else if(pickedTitle===cur.title) msg='せいかい！「'+cur.title+'」です'+(playing?'。最後までききましょう。':'');
+  else msg='おしい！ こたえは「'+cur.title+'」でした'+(playing?'。\nでも、最後まできいてくださいね。':'');
+  $('res').textContent=msg; $('lyr').textContent=cur.lyrics||'';
+  $('reveal').classList.add('show'); $('game').classList.add('after');
+  if(state!=='ended') setStatus('みんなで うたいながら、さいごまで きいてみましょう');
+  refreshButtons();
+}
+
+function onNext(){
+  if(state!=='ended') return;
+  qi++;
+  if(qi>=questions.length){ stopAudio(); showScreen('end'); playVoiceFree(VOICE_DIR+'end'+VOICE_EXT); }
+  else loadQuestion();
+}
+
+function toTitle(){ stopAudio(); showScreen('start'); }
+function backToTitle(){ if(confirm('はじめの画面に もどりますか？')) toTitle(); }
+</script>
+</body>
+</html>
