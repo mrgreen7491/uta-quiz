@@ -18,6 +18,8 @@ button:disabled{cursor:default;opacity:.35}
 #start{justify-content:center;gap:3vh}
 #start h1{font-size:8.5vh;color:#b0421a;text-align:center;line-height:1.25}
 #start .sub{font-size:4vh;color:#6b4a2b}
+.introbtn{font-size:4.2vh;padding:1.6vh 3vw;border-radius:2vh;color:#fff;background:linear-gradient(135deg,#d8a02a,#b87d12);box-shadow:0 .7vh 0 #7e5408}
+.introbtn:active{transform:translateY(.5vh)}
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:2.5vh 2.5vw;width:min(1100px,92vw)}
 .cat{font-size:6vh;padding:3vh 1vw;border-radius:2.5vh;color:#fff;background:linear-gradient(135deg,#e07a3a,#c85a22);box-shadow:0 .8vh 0 #8f3f14}
 .cat.b{background:linear-gradient(135deg,#4f9a8a,#2f7a6a);box-shadow:0 .8vh 0 #1d5648}
@@ -85,6 +87,7 @@ button:disabled{cursor:default;opacity:.35}
 <div id="start" class="screen active">
   <h1>なつかしの歌<br>きょくあてクイズ</h1>
   <div class="sub">うたを きいて、曲名を あてましょう</div>
+  <button class="introbtn" id="btnIntro" onclick="toggleIntro()">🔈 せつめいを きく</button>
   <div class="cats">
     <button class="cat" onclick="startGame('shoka')">しょうか</button>
     <button class="cat b" onclick="startGame('doyo')">どうよう</button>
@@ -184,6 +187,18 @@ function pickVoice(kind){
 }
 function stopVoice(){
   if(voiceAudio){voiceAudio.onended=null;voiceAudio.onerror=null;voiceAudio.pause();voiceAudio=null;}
+  setIntroBtn(false);
+}
+// はじめの画面の「せつめい」（職員さんが押す。ブラウザの決まりで、押すまで音は出せない）
+function setIntroBtn(on){ const b=document.getElementById('btnIntro'); if(b) b.textContent=on?'■ せつめいを とめる':'🔈 せつめいを きく'; }
+function toggleIntro(){
+  if(voiceAudio && voiceAudio._intro){ stopVoice(); return; }
+  stopVoice();
+  const v=new Audio(VOICE_DIR+'intro'+VOICE_EXT); v.volume=VOICE_VOL; v._intro=true; voiceAudio=v;
+  const done=()=>{ if(voiceAudio===v){ voiceAudio=null; setIntroBtn(false); } };
+  v.onended=done; v.onerror=done;
+  setIntroBtn(true);
+  v.play().catch(done);
 }
 function playVoiceFree(path){   // 曲のあと・終了：ならなくても、何も起きない
   stopVoice();
