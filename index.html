@@ -10,6 +10,7 @@ html,body{width:100%;height:100%;overflow:hidden}
 body{background:#fdf3e1;color:#3b2a1a}
 .screen{display:none;position:absolute;inset:0;padding:2.2vh 3vw;flex-direction:column;align-items:center}
 .screen.active{display:flex}
+.screen>*{flex-shrink:0}
 button{cursor:pointer;border:none;font-weight:bold;font-family:inherit}
 button:disabled{cursor:default;opacity:.35}
 
@@ -46,20 +47,25 @@ button:disabled{cursor:default;opacity:.35}
 .choice.wrong .n{background:#e0a02a}
 .choice:disabled{opacity:1}
 .choice.dim{opacity:.45}
-.after .choices{gap:.8vh}
+.after .choices{display:none}
 .after .choice{font-size:4.4vh;padding:.6vh 2.2vw}
 .after .choice .n{width:5.4vh;height:5.4vh;font-size:3.6vh}
 .after .qtitle{font-size:5vh}
 .after .note{font-size:5.6vh}
 .after .status{display:none}
-.after .reveal .res{font-size:4.2vh;line-height:1.3}
-.after .reveal .lyr{font-size:3.9vh;line-height:1.3;margin-top:.5vh}
-.after .reveal{padding:1vh 2vw}
+.after .reveal .res{font-size:5.2vh;line-height:1.3}
+.after .reveal{width:97vw}
+.after .reveal .lyr{font-size:6.6vh;margin-top:1.2vh}
+.lyr{display:inline-block;text-align:left;white-space:nowrap;color:#3b2a1a}
+.lyr .ln{display:block;text-indent:2em;white-space:nowrap;line-height:1.95}
+.lyr .gap{display:inline-block;width:1.1em}
+.lyr ruby rt{font-size:.42em;color:#7a4a22;font-weight:bold;letter-spacing:.02em}
+.after .reveal{padding:1.2vh 1vw}
 .after .cbtn{font-size:3.8vh;padding:1.2vh 2.2vw}
 .reveal{width:min(1300px,92vw);display:none;background:#fffaf0;border:.5vh solid #e0b878;border-radius:2.2vh;padding:1.6vh 2vw;text-align:center}
 .reveal.show{display:block}
 .reveal .res{font-size:5.4vh;font-weight:bold;color:#b0421a;white-space:pre-line}
-.reveal .lyr{font-size:4.6vh;line-height:1.45;margin-top:1vh;white-space:pre-line}
+.reveal .lyr{font-size:4.6vh;margin-top:1vh}
 .ctrl{display:flex;gap:2vw;margin-top:auto;padding-bottom:.5vh}
 .cbtn{font-size:4.4vh;padding:1.8vh 2.6vw;border-radius:2vh;color:#fff;min-width:19vw}
 #btnPlay{background:#e07a3a;box-shadow:0 .7vh 0 #8f3f14}
@@ -114,28 +120,48 @@ button:disabled{cursor:default;opacity:.35}
 // ---- 曲のデータ ----
 // kind: shoka=唱歌 / doyo=童謡。audio があるものだけが問題になる。ないものは、まちがいの選択肢にだけ使う。
 const SONGS = [
+  // 唱歌（上の10曲）
   {id:'furusato', title:'ふるさと', kind:'shoka', audio:'audio/furusato.m4a',
-   lyrics:'兎追いし かの山\n小鮒釣りし かの川\n夢は今も めぐりて\n忘れがたき 故郷'},
+   lyrics:"兎{うさぎ}追{お}いし かの山{やま}　小鮒{こぶな}釣{つ}りし かの川{かわ}\n夢{ゆめ}は今{いま}も めぐりて　忘{わす}れがたき 故郷{ふるさと}"},
+  {id:'oborozukiyo', title:'朧月夜', kind:'shoka', audio:'audio/oborozukiyo.m4a',
+   lyrics:"菜{な}の花畑{はなばたけ}に 入{い}り日{ひ}薄{うす}れ　見{み}わたす山{やま}の端{は} 霞{かすみ}ふかし\n春風{はるかぜ}そよふく 空{そら}を見{み}れば　夕月{ゆうづき}かかりて におい淡{あわ}し"},
+  {id:'harugakita', title:'春が来た', kind:'shoka', audio:'audio/harugakita.m4a',
+   lyrics:"春{はる}が来{き}た 春{はる}が来{き}た どこに来{き}た\n山{やま}に来{き}た 里{さと}に来{き}た 野{の}にも来{き}た"},
+  {id:'momiji', title:'もみじ', kind:'shoka', audio:'audio/momiji.m4a',
+   lyrics:"秋{あき}の夕日{ゆうひ}に 照{て}る山{やま}もみじ　濃{こ}いも薄{うす}いも 数{かず}ある中{なか}に\n松{まつ}をいろどる 楓{かえで}や蔦{つた}は　山{やま}のふもとの 裾模様{すそもよう}"},
+  {id:'kishapoppo', title:'汽車ポッポ', kind:'shoka', audio:'audio/kishapoppo.m4a',
+   lyrics:"汽車{きしゃ}汽車{きしゃ} ポッポポッポ　シュッポシュッポ シュッポッポ\n僕{ぼく}らをのせて シュッポシュッポ シュッポッポ\nスピード スピード 窓{まど}の外{そと}　畑{はたけ}も飛{と}ぶ飛{と}ぶ 家{いえ}も飛{と}ぶ\n走{はし}れ走{はし}れ 走{はし}れ 鉄橋{てっきょう}だ 鉄橋{てっきょう}だ 楽{たの}しいな"},
+  {id:'warewauminoko', title:'われは海の子', kind:'shoka', audio:'audio/warewauminoko.m4a',
+   lyrics:"我{われ}は海{うみ}の子{こ} 白浪{しらなみ}の　さわぐいそべの 松原{まつばら}に\n煙{けむり}たなびく とまやこそ　我{わ}がなつかしき 住家{すみか}なれ"},
+  {id:'chatsumi', title:'茶摘み', kind:'shoka', audio:'audio/chatsumi.m4a',
+   lyrics:"夏{なつ}も近{ちか}づく 八十八夜{はちじゅうはちや}　野{の}にも山{やま}にも 若葉{わかば}が茂{しげ}る\nあれに見{み}えるは 茶摘{ちゃつ}じゃないか　あかねだすきに 菅{すげ}の笠{かさ}"},
+  {id:'mushinokoe', title:'虫のこえ', kind:'shoka', audio:'audio/mushinokoe.m4a',
+   lyrics:"あれ松虫{まつむし}が 鳴{な}いている　ちんちろちんちろ ちんちろりん\nあれ鈴虫{すずむし}も 鳴{な}きだした　りんりんりんりん りいんりん\n秋{あき}の夜長{よなが}を 鳴{な}きとおす　ああ おもしろい 虫{むし}のこえ"},
+  {id:'momotaro', title:'桃太郎', kind:'shoka', audio:'audio/momotaro.m4a',
+   lyrics:"桃太郎{ももたろう}さん 桃太郎{ももたろう}さん　お腰{こし}につけた きびだんご\nひとつ わたしに くださいな"},
+  {id:'kojonotsuki', title:'荒城の月', kind:'shoka', audio:'audio/kojonotsuki.m4a',
+   lyrics:"春{はる}高楼{こうろう}の 花{はな}の宴{えん}　めぐる盃{さかずき} かげさして\n千代{ちよ}の松{まつ}が枝{え} わけいでし　むかしの光{ひかり} いまいずこ"},
+  // 童謡（下の10曲）
   {id:'akatonbo', title:'赤とんぼ', kind:'doyo', audio:'audio/akatonbo.m4a',
-   lyrics:'夕焼 小焼の 赤とんぼ\n負われて見たのは いつの日か'},
-  {id:'oborozukiyo', title:'朧月夜', kind:'shoka', audio:'audio/oborozukiyo.m4a'},
-  {id:'harugakita', title:'春が来た', kind:'shoka', audio:'audio/harugakita.m4a'},
-  {id:'momiji', title:'もみじ', kind:'shoka', audio:'audio/momiji.m4a'},
-  {id:'kishapoppo', title:'汽車', kind:'shoka', audio:'audio/kishapoppo.m4a'},
-  {id:'warewauminoko', title:'われは海の子', kind:'shoka', audio:'audio/warewauminoko.m4a'},
-  {id:'chatsumi', title:'茶摘み', kind:'shoka', audio:'audio/chatsumi.m4a'},
-  {id:'mushinokoe', title:'虫のこえ', kind:'shoka', audio:'audio/mushinokoe.m4a'},
-  {id:'momotaro', title:'桃太郎', kind:'shoka', audio:'audio/momotaro.m4a'},
-  {id:'kojonotsuki', title:'荒城の月', kind:'shoka', audio:'audio/kojonotsuki.m4a'},
-  {id:'nanatsunoko', title:'七つの子', kind:'doyo', audio:'audio/nanatsunoko.m4a'},
-  {id:'shabondama', title:'シャボン玉', kind:'doyo', audio:'audio/shabondama.m4a'},
-  {id:'akaikutsu', title:'赤い靴', kind:'doyo', audio:'audio/akaikutsu.m4a'},
-  {id:'usagi', title:'うさぎ', kind:'doyo', audio:'audio/usagi.m4a'},
-  {id:'kutsuganaru', title:'靴が鳴る', kind:'doyo', audio:'audio/kutsuganaru.m4a'},
-  {id:'dongurikorokoro', title:'どんぐりころころ', kind:'doyo', audio:'audio/dongurikorokoro.m4a'},
-  {id:'seikurabe', title:'背くらべ', kind:'doyo', audio:'audio/seikurabe.m4a'},
-  {id:'shojojinotanukibayashi', title:'証城寺の狸囃子', kind:'doyo', audio:'audio/shojojinotanukibayashi.m4a'},
-  {id:'anomachikonomachi', title:'あの町この町', kind:'doyo', audio:'audio/anomachikonomachi.m4a'}
+   lyrics:"夕焼{ゆうやけ} 小焼{こやけ}の 赤{あか}とんぼ\n負{お}われて見{み}たのは いつの日{ひ}か"},
+  {id:'nanatsunoko', title:'七つの子', kind:'doyo', audio:'audio/nanatsunoko.m4a',
+   lyrics:"烏{からす} なぜ啼{な}くの　烏{からす}は山{やま}に\n可愛{かわい}い七{なな}つの　子{こ}があるからよ"},
+  {id:'shabondama', title:'シャボン玉', kind:'doyo', audio:'audio/shabondama.m4a',
+   lyrics:"シャボン玉{だま} 飛{と}んだ　屋根{やね}まで飛{と}んだ\n屋根{やね}まで飛{と}んで　こわれて消{き}えた"},
+  {id:'akaikutsu', title:'赤い靴', kind:'doyo', audio:'audio/akaikutsu.m4a',
+   lyrics:"赤{あか}い靴{くつ} はいてた 女{おんな}の子{こ}　異人{いじん}さんに つれられて\n行{い}っちゃった"},
+  {id:'usagi', title:'うさぎ', kind:'doyo', audio:'audio/usagi.m4a',
+   lyrics:"うさぎ うさぎ　なに見{み}てはねる\n十五夜{じゅうごや}お月{つき}さま　見{み}てはねる"},
+  {id:'kutsuganaru', title:'靴が鳴る', kind:'doyo', audio:'audio/kutsuganaru.m4a',
+   lyrics:"お手々{てて}つないで 野道{のみち}を行{ゆ}けば　みんな可愛{かわい}い 小鳥{ことり}になって\n歌{うた}をうたえば 靴{くつ}が鳴{な}る　晴{は}れたみ空{ぞら}に 靴{くつ}が鳴{な}る"},
+  {id:'dongurikorokoro', title:'どんぐりころころ', kind:'doyo', audio:'audio/dongurikorokoro.m4a',
+   lyrics:"どんぐり ころころ どんぶりこ　お池{いけ}にはまって さあ大変{たいへん}\nどじょうが出{で}て来{き}て 今日{こんにち}は　坊{ぼっ}ちゃん一緒{いっしょ}に 遊{あそ}びましょう"},
+  {id:'seikurabe', title:'背くらべ', kind:'doyo', audio:'audio/seikurabe.m4a',
+   lyrics:"柱{はしら}のきずは おととしの 五月{ごがつ}五日{いつか}の 背{せ}くらべ\nちまきたべたべ 兄{にい}さんが 計{はか}ってくれた 背{せ}のたけ\nきのうくらべりゃ 何{なん}のこと やっと羽織{はおり}の 紐{ひも}のとこ"},
+  {id:'shojojinotanukibayashi', title:'証城寺の狸囃子', kind:'doyo', audio:'audio/shojojinotanukibayashi.m4a',
+   lyrics:"しょう しょう 証城寺{しょうじょうじ} 証城寺{しょうじょうじ}の庭{にわ}は\nつ つ 月夜{つきよ}だ 皆{みんな}出{で}て 来{こ}い来{こ}い来{こ}い\nおいらの友達{ともだち}ア ぽんぽこ ぽんのぽん"},
+  {id:'anomachikonomachi', title:'あの町この町', kind:'doyo', audio:'audio/anomachikonomachi.m4a',
+   lyrics:"あの町{まち} この町{まち} 日{ひ}が暮{く}れる 日{ひ}が暮{く}れる\n今{いま}きたこの道{みち} 帰{かえ}りゃんせ 帰{かえ}りゃんせ"}
 ];
 
 let questions=[], qi=0, cur=null, audio=null;
@@ -149,6 +175,7 @@ function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor
 // ---- 声（ファイルがなくても、そのまま動く） ----
 // audio/voice/ask1.wav〜ask3.wav（曲の直前）、after1.wav〜after3.wav（曲のあと）、end.wav（終了画面）
 const VOICE_DIR='audio/voice/', VOICE_EXT='.wav';
+const VOICE_VOL=0.7;   // 男性の声の大きさ（0〜1）。ピアノより小さめ
 const lastVoice={ask:0,after:0};
 let voiceAudio=null;   // 曲のあとの声・終了の声（曲とは別に管理）
 function pickVoice(kind){
@@ -160,12 +187,14 @@ function stopVoice(){
 }
 function playVoiceFree(path){   // 曲のあと・終了：ならなくても、何も起きない
   stopVoice();
-  const v=new Audio(path); voiceAudio=v;
+  const v=new Audio(path); v.volume=VOICE_VOL; voiceAudio=v;
   v.onerror=()=>{ if(voiceAudio===v) voiceAudio=null; };
   v.play().catch(()=>{ if(voiceAudio===v) voiceAudio=null; });
 }
 
 function stopAudio(){
+  if(introTimer){clearTimeout(introTimer);introTimer=null;}
+  pendingStart=false;
   stopVoice();
   if(audio){audio.onended=null;audio.onerror=null;audio.ontimeupdate=null;audio.pause();audio=null;}
 }
@@ -212,13 +241,19 @@ function refreshButtons(){
   $('btnNext').disabled=!(state==='ended');
 }
 
+// 掛け声が終わってから曲が始まるまでの間（曲の冒頭の約0.3秒と合わせて、約1.3秒）
+const SONG_GAP_MS=1000;
+let introTimer=null, pendingStart=false;
 function startIntro(){   // 曲の直前の一言。ならなければ、すぐ曲へ
   stopAudio();
-  const v=new Audio(pickVoice('ask')); audio=v;
-  let went=false; const go=()=>{ if(went||v!==audio) return; went=true; startAudio(); };
-  v.onended=go; v.onerror=go;
+  const v=new Audio(pickVoice('ask')); v.volume=VOICE_VOL; audio=v;
+  let went=false;
+  const go=(gap)=>{ if(went||v!==audio) return; went=true;
+    if(gap>0){ introTimer=setTimeout(()=>{ introTimer=null; if(state==='playing') startAudio(); },gap); }
+    else startAudio(); };
+  v.onended=()=>go(SONG_GAP_MS); v.onerror=()=>go(0);
   state='playing'; $('note').classList.add('play'); setStatus('きいてください…');
-  v.play().catch(go);
+  v.play().catch(()=>go(0));
   refreshButtons();
 }
 
@@ -238,8 +273,11 @@ function startAudio(){
 function onPlay(){
   if(state==='idle'){ startIntro(); }
   else if(state==='ended'){ startAudio(); }
-  else if(state==='playing'){ audio.pause(); state='paused'; $('note').classList.remove('play'); setStatus('いちじ ていし中'); refreshButtons(); }
+  else if(state==='playing'){
+    if(introTimer){ clearTimeout(introTimer); introTimer=null; pendingStart=true; }   // 掛け声と曲のあいだに止めたとき
+    audio.pause(); state='paused'; $('note').classList.remove('play'); setStatus('いちじ ていし中'); refreshButtons(); }
   else if(state==='paused'){ state='playing'; $('note').classList.add('play'); setStatus('きいてください…');
+    if(pendingStart){ pendingStart=false; startAudio(); return; }
     audio.play().catch(()=>{}); refreshButtons(); }
 }
 
@@ -257,6 +295,28 @@ function onPick(i,t){
 }
 function onShow(){ if(!revealed) reveal(-1); }
 
+
+// 歌詞：「漢字{よみ}」をルビ（ふりがな）にする。全角スペースは、フレーズのあいだのすきま
+function renderLyrics(t){
+  return t.split('\n').map(line=>'<span class="ln">'+line
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/([一-龥々]+)\{([^}]+)\}/g,'<ruby>$1<rt>$2</rt></ruby>')
+    .replace(/\u3000/g,'<span class="gap"></span>')+'</span>').join('');
+}
+// 歌詞を、横幅いっぱい・ボタンにかぶらない最大の大きさに合わせる
+function fitLyrics(){
+  const l=$('lyr'), rv=$('reveal'), btn=$('btnPlay');
+  if(!l.firstChild) return;
+  const cs=getComputedStyle(rv), avail=rv.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  for(let sz=10; sz>=3; sz-=0.25){
+    l.style.fontSize=sz+'vh';
+    // ボタンの位置は、はみ出すと下へずれるので、使えない。画面の高さから、ボタンの分を引いた線を使う
+    const limit=innerHeight-btn.offsetHeight-innerHeight*0.035-4;
+    if(l.offsetWidth<=avail && rv.getBoundingClientRect().bottom<=limit) break;
+  }
+}
+window.addEventListener('resize',()=>{ if($('reveal').classList.contains('show')) fitLyrics(); });
+
 function reveal(pickedTitle){
   revealed=true;
   const btns=[...document.querySelectorAll('.choice')];
@@ -272,8 +332,9 @@ function reveal(pickedTitle){
   if(pickedTitle===-1) msg='こたえは「'+cur.title+'」です'+(playing?'。最後までききましょう。':'');
   else if(pickedTitle===cur.title) msg='せいかい！「'+cur.title+'」です'+(playing?'。最後までききましょう。':'');
   else msg='おしい！ こたえは「'+cur.title+'」でした'+(playing?'。\nでも、最後まできいてくださいね。':'');
-  $('res').textContent=msg; $('lyr').textContent=cur.lyrics||'';
+  $('res').textContent=msg; $('lyr').innerHTML=renderLyrics(cur.lyrics||'');
   $('reveal').classList.add('show'); $('game').classList.add('after');
+  fitLyrics();
   if(state!=='ended') setStatus('みんなで うたいながら、さいごまで きいてみましょう');
   refreshButtons();
 }
