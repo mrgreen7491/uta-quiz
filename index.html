@@ -80,11 +80,31 @@ button:disabled{cursor:default;opacity:.35}
 #end h2{font-size:9vh;color:#b0421a}
 #end p{font-size:5vh;color:#6b4a2b}
 #btnRestart{font-size:5.4vh;padding:2.4vh 5vw;border-radius:2.4vh;color:#fff;background:linear-gradient(135deg,#4f9a8a,#2f7a6a);box-shadow:0 .8vh 0 #1d5648}
+
+/* キャラクター（スタート画面だけ。せつめいの声に合わせて口が動く） */
+#start{flex-direction:row;gap:3vw}
+#start .smain{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;width:calc(100vw - 36vw - 12vw)}
+#start .smain .cats{width:100%}
+#start .chara{flex:none;width:min(36vw,66vh)}
+#start .chara img{display:block;width:100%;height:auto;border-radius:2vh;box-shadow:0 .8vh 2vh rgba(60,40,20,.25)}
+@media (max-aspect-ratio:1/1){#start .chara{display:none}#start .smain{width:100%}}
+#start .smain .credit{position:static;margin-top:1vh}
+#end{flex-direction:row;gap:3vw}
+#end .emain{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;width:calc(100vw - 36vw - 12vw)}
+#end .emain p{font-size:4vh;white-space:nowrap}
+#end .emain h2{font-size:8vh;white-space:nowrap}
+#end .chara{flex:none;width:min(36vw,66vh)}
+#end .chara img{display:block;width:100%;height:auto;border-radius:2vh;box-shadow:0 .8vh 2vh rgba(60,40,20,.25)}
+@media (max-aspect-ratio:7/5){#end .emain h2{font-size:6.2vh}#end .emain p{font-size:3.2vh}}
+@media (max-aspect-ratio:1/1){#end .chara{display:none}#end .emain{width:100%}}
+@media (max-aspect-ratio:7/5){#start h1{font-size:6.4vh}#start .smain{gap:2vh}}
 </style>
 </head>
 <body>
 
 <div id="start" class="screen active">
+  <div class="chara"><img class="charaimg" src="chara_close.jpg" alt="司会者"></div>
+  <div class="smain">
   <h1>なつかしの歌<br>きょくあてクイズ</h1>
   <div class="sub">うたを きいて、曲名を あてましょう</div>
   <button class="introbtn" id="btnIntro" onclick="toggleIntro()">🔈 せつめいを きく</button>
@@ -94,6 +114,7 @@ button:disabled{cursor:default;opacity:.35}
     <button class="cat all" onclick="startGame('all')">ぜんぶ</button>
   </div>
   <div class="credit">AIの助けを借りて作りました</div>
+  </div>
 </div>
 
 <div id="game" class="screen">
@@ -114,9 +135,12 @@ button:disabled{cursor:default;opacity:.35}
 </div>
 
 <div id="end" class="screen">
+  <div class="chara"><img class="charaimg" src="chara_close.jpg" alt="司会者"></div>
+  <div class="emain">
   <h2>おつかれさまでした！</h2>
   <p>みなさんで うたって、たのしかったですね</p>
   <button id="btnRestart" onclick="toTitle()">はじめに もどる</button>
+  </div>
 </div>
 
 <script>
@@ -137,18 +161,18 @@ const SONGS = [
   {id:'warewauminoko', title:'われは海の子', kind:'shoka', audio:'audio/warewauminoko.m4a',
    lyrics:"我{われ}は海{うみ}の子{こ} 白浪{しらなみ}の　さわぐいそべの 松原{まつばら}に\n煙{けむり}たなびく とまやこそ　我{わ}がなつかしき 住家{すみか}なれ"},
   {id:'chatsumi', title:'茶摘み', kind:'shoka', audio:'audio/chatsumi.m4a',
-   lyrics:"夏{なつ}も近{ちか}づく 八十八夜{はちじゅうはちや}　野{の}にも山{やま}にも 若葉{わかば}が茂{しげ}る\nあれに見{み}えるは 茶摘{ちゃつ}みじゃないか　あかねだすきに 菅{すげ}の笠{かさ}"},
+   lyrics:"夏{なつ}も近{ちか}づく 八十八夜{はちじゅうはちや}　野{の}にも山{やま}にも 若葉{わかば}が茂{しげ}る\nあれに見{み}えるは 茶摘{ちゃつ}じゃないか　あかねだすきに 菅{すげ}の笠{かさ}"},
   {id:'mushinokoe', title:'虫のこえ', kind:'shoka', audio:'audio/mushinokoe.m4a',
    lyrics:"あれ松虫{まつむし}が 鳴{な}いている　ちんちろちんちろ ちんちろりん\nあれ鈴虫{すずむし}も 鳴{な}きだした　りんりんりんりん りいんりん\n秋{あき}の夜長{よなが}を 鳴{な}きとおす　ああ おもしろい 虫{むし}のこえ"},
   {id:'momotaro', title:'桃太郎', kind:'shoka', audio:'audio/momotaro.m4a',
-   lyrics:"桃太郎{ももたろう}さん 桃太郎{ももたろう}さん　お腰{こし}につけた 黍団子{きびだんご}\n一{ひと}つわたしに 下{くだ}さいな\nあげましょう あげましょう　これから鬼{おに}の征伐{せいばつ}に\nついて行{い}くなら あげましょう"},
+   lyrics:"桃太郎{ももたろう}さん 桃太郎{ももたろう}さん　お腰{こし}につけた きびだんご\nひとつ わたしに くださいな"},
   {id:'kojonotsuki', title:'荒城の月', kind:'shoka', audio:'audio/kojonotsuki.m4a',
    lyrics:"春{はる}高楼{こうろう}の 花{はな}の宴{えん}　めぐる盃{さかずき} かげさして\n千代{ちよ}の松{まつ}が枝{え} わけいでし　むかしの光{ひかり} いまいずこ"},
   // 童謡（下の10曲）
   {id:'akatonbo', title:'赤とんぼ', kind:'doyo', audio:'audio/akatonbo.m4a',
    lyrics:"夕焼{ゆうやけ} 小焼{こやけ}の 赤{あか}とんぼ\n負{お}われて見{み}たのは いつの日{ひ}か"},
   {id:'nanatsunoko', title:'七つの子', kind:'doyo', audio:'audio/nanatsunoko.m4a',
-   lyrics:"烏{からす} なぜ啼{な}くの　烏{からす}は山{やま}に\n可愛{かわい}い七{なな}つの　子{こ}があるからよ\n可愛{かわい}い 可愛{かわい}いとからすは啼{な}くの\n可愛{かわい}い 可愛{かわい}いと啼{な}くんだよ"},
+   lyrics:"烏{からす} なぜ啼{な}くの　烏{からす}は山{やま}に\n可愛{かわい}い七{なな}つの　子{こ}があるからよ"},
   {id:'shabondama', title:'シャボン玉', kind:'doyo', audio:'audio/shabondama.m4a',
    lyrics:"シャボン玉{だま} 飛{と}んだ　屋根{やね}まで飛{と}んだ\n屋根{やね}まで飛{と}んで　こわれて消{き}えた"},
   {id:'akaikutsu', title:'赤い靴', kind:'doyo', audio:'audio/akaikutsu.m4a',
@@ -160,7 +184,7 @@ const SONGS = [
   {id:'dongurikorokoro', title:'どんぐりころころ', kind:'doyo', audio:'audio/dongurikorokoro.m4a',
    lyrics:"どんぐり ころころ どんぶりこ　お池{いけ}にはまって さあ大変{たいへん}\nどじょうが出{で}て来{き}て 今日{こんにち}は　坊{ぼっ}ちゃん一緒{いっしょ}に 遊{あそ}びましょう"},
   {id:'seikurabe', title:'背くらべ', kind:'doyo', audio:'audio/seikurabe.m4a',
-   lyrics:"柱{はしら}のきずは おととしの 五月{ごがつ}五日{いつか}の 背{せ}くらべ\nちまきたべたべ 兄{にい}さんが 計{はか}ってくれた 背{せ}のたけ\nきのうくらべりゃ 何{なん}のこと やっと羽織{はおり}の 紐{ひも}のたけ"},
+   lyrics:"柱{はしら}のきずは おととしの 五月{ごがつ}五日{いつか}の 背{せ}くらべ\nちまきたべたべ 兄{にい}さんが 計{はか}ってくれた 背{せ}のたけ\nきのうくらべりゃ 何{なん}のこと やっと羽織{はおり}の 紐{ひも}のとこ"},
   {id:'shojojinotanukibayashi', title:'証城寺の狸囃子', kind:'doyo', audio:'audio/shojojinotanukibayashi.m4a',
    lyrics:"しょう しょう 証城寺{しょうじょうじ} 証城寺{しょうじょうじ}の庭{にわ}は\nつ つ 月夜{つきよ}だ 皆{みんな}出{で}て 来{こ}い来{こ}い来{こ}い\nおいらの友達{ともだち}ア ぽんぽこ ぽんのぽん"},
   {id:'anomachikonomachi', title:'あの町この町', kind:'doyo', audio:'audio/anomachikonomachi.m4a',
@@ -176,7 +200,7 @@ function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classL
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 // ---- 声（ファイルがなくても、そのまま動く） ----
-// audio/voice/ask1.wav〜ask3.wav（曲の直前）、after1.wav〜after3.wav（曲のあと）、end.wav（終了画面）
+// audio/voice/ask1.wav〜ask3.wav（曲の直前）、after1.wav〜after3.wav（曲のあと）、ending.wav（終了画面）
 const VOICE_DIR='audio/voice/', VOICE_EXT='.wav';
 const VOICE_VOL=0.7;   // 男性の声の大きさ（0〜1）。ピアノより小さめ
 const lastVoice={ask:0,after:0};
@@ -190,7 +214,46 @@ function stopVoice(){
   setIntroBtn(false);
 }
 // はじめの画面の「せつめい」（職員さんが押す。ブラウザの決まりで、押すまで音は出せない）
-function setIntroBtn(on){ const b=document.getElementById('btnIntro'); if(b) b.textContent=on?'■ せつめいを とめる':'🔈 せつめいを きく'; }
+function setIntroBtn(on){ const b=document.getElementById('btnIntro'); if(b) b.textContent=on?'■ せつめいを とめる':'🔈 せつめいを きく'; if(!on) lipStop(); }
+
+// ---- 口パク（せつめいの声の大きさを測って、4枚の画像を切りかえる） ----
+const CH={close:'chara_close.jpg',half:'chara_half.jpg',open:'chara_open.jpg',blink:'chara_blink.jpg'};
+Object.values(CH).forEach(src=>{const i=new Image();i.src=src;});   // 先に読みこむ（チラつき防止）
+const LIP_OPEN=140, LIP_HALF=60;   // しきい値（声の大きさ。あとで調整できる）
+let lipCtx=null, lipAn=null, lipTimer=null, blinkTimer=null, blinking=false, lipAudio=null;
+function setChara(k){ document.querySelectorAll('.charaimg').forEach(im=>{ im.src=CH[k]; }); }
+function lipStart(a){
+  lipStop(); lipAudio=a;
+  // 声の解析は、インターネット上（https）だけで使える。パソコン内のファイルを直接開いたときは、簡易の口パク。
+  if(!lipCtx && /^https?:$/.test(location.protocol)){
+    try{ lipCtx=new (window.AudioContext||window.webkitAudioContext)(); lipAn=lipCtx.createAnalyser(); lipAn.fftSize=256; lipAn.smoothingTimeConstant=0.3; lipAn.connect(lipCtx.destination); }
+    catch(e){ lipCtx=null; lipAn=null; }
+  }
+  let useAn=false;
+  if(lipAn){ try{ lipCtx.createMediaElementSource(a).connect(lipAn); useAn=true; if(lipCtx.state==='suspended') lipCtx.resume(); }catch(e){ useAn=false; } }
+  const data=useAn?new Uint8Array(lipAn.frequencyBinCount):null;
+  lipTimer=setInterval(()=>{
+    if(blinking) return;
+    if(!lipAudio||lipAudio.paused||lipAudio.ended){ setChara('close'); return; }
+    if(!useAn){ const r=Math.random(); setChara(r>.66?'open':(r>.33?'half':'close')); return; }
+    lipAn.getByteFrequencyData(data);
+    let sum=0; for(let i=0;i<30;i++) sum+=data[i];
+    const avg=sum/30;
+    window.__lipAvg=avg;
+    setChara(avg>LIP_OPEN?'open':(avg>LIP_HALF?'half':'close'));
+  },90);
+  const schedBlink=()=>{
+    blinkTimer=setTimeout(()=>{
+      if(lipAudio&&!lipAudio.paused&&!lipAudio.ended){ blinking=true; setChara('blink'); setTimeout(()=>{ blinking=false; setChara('close'); },150); }
+      schedBlink();
+    },3000+Math.random()*2000);
+  };
+  schedBlink();
+}
+function lipStop(){
+  clearInterval(lipTimer); clearTimeout(blinkTimer); lipTimer=null; blinkTimer=null; blinking=false; lipAudio=null;
+  setChara('close');
+}
 function toggleIntro(){
   if(voiceAudio && voiceAudio._intro){ stopVoice(); return; }
   stopVoice();
@@ -198,6 +261,7 @@ function toggleIntro(){
   const done=()=>{ if(voiceAudio===v){ voiceAudio=null; setIntroBtn(false); } };
   v.onended=done; v.onerror=done;
   setIntroBtn(true);
+  lipStart(v);
   v.play().catch(done);
 }
 function playVoiceFree(path){   // 曲のあと・終了：ならなくても、何も起きない
@@ -205,6 +269,22 @@ function playVoiceFree(path){   // 曲のあと・終了：ならなくても、
   const v=new Audio(path); v.volume=VOICE_VOL; voiceAudio=v;
   v.onerror=()=>{ if(voiceAudio===v) voiceAudio=null; };
   v.play().catch(()=>{ if(voiceAudio===v) voiceAudio=null; });
+}
+
+// 終了画面の声（ending.wav）。キャラの口が動く
+function playEndVoice(){
+  stopVoice();
+  const names=['ending'];
+  const tryPlay=(i)=>{
+    if(i>=names.length) return;
+    const v=new Audio(VOICE_DIR+names[i]+VOICE_EXT); v.volume=VOICE_VOL; voiceAudio=v;
+    const fin=()=>{ if(voiceAudio===v){ voiceAudio=null; lipStop(); } };
+    v.onended=fin;
+    v.onerror=()=>{ if(voiceAudio===v){ voiceAudio=null; lipStop(); tryPlay(i+1); } };
+    lipStart(v);
+    v.play().catch((e)=>{ if(e&&e.name==='NotAllowedError'&&voiceAudio===v){ voiceAudio=null; lipStop(); } });   // ファイルがないときは onerror が次を試す
+  };
+  tryPlay(0);
 }
 
 function stopAudio(){
@@ -357,7 +437,7 @@ function reveal(pickedTitle){
 function onNext(){
   if(state!=='ended') return;
   qi++;
-  if(qi>=questions.length){ stopAudio(); showScreen('end'); playVoiceFree(VOICE_DIR+'ending'+VOICE_EXT); }
+  if(qi>=questions.length){ stopAudio(); showScreen('end'); playEndVoice(); }
   else loadQuestion();
 }
 
@@ -393,4 +473,3 @@ function backToTitle(){ if(confirm('はじめの画面に もどりますか？'
 </script>
 </body>
 </html>
-
